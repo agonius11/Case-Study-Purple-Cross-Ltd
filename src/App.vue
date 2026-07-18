@@ -1,12 +1,9 @@
 <script setup lang="ts">
-// Root component. For now it only establishes the Vuetify application shell;
-// the full navigation layout is introduced in the next phase.
+import AppLayout from '@/layouts/AppLayout.vue'
 </script>
 
 <template>
   <v-app>
-    <v-main>
-      <router-view />
-    </v-main>
+    <AppLayout />
   </v-app>
 </template>
