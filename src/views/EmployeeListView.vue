@@ -8,6 +8,8 @@ import { useEmployeeFilters, STATUS_OPTIONS } from '@/composables/useEmployeeFil
 import { formatDate } from '@/utils/date'
 import EmploymentStatusChip from '@/components/EmploymentStatusChip.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import ImportDialog from '@/components/ImportDialog.vue'
+import { downloadFile, toCsv, toJson } from '@/utils/employeeIO'
 import type { Employee } from '@/types/employee'
 
 const router = useRouter()
@@ -29,6 +31,18 @@ const headers = [
   { title: 'Termination Date', key: 'terminationDate' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' as const, width: 140 },
 ]
+
+const importOpen = ref(false)
+
+function exportJson() {
+  downloadFile('purple-cross-employees.json', toJson(employees.value), 'application/json')
+  snackbar.success(`Exported ${count.value} records as JSON`)
+}
+
+function exportCsv() {
+  downloadFile('purple-cross-employees.csv', toCsv(employees.value), 'text/csv')
+  snackbar.success(`Exported ${count.value} records as CSV`)
+}
 
 function createEmployee() {
   router.push({ name: 'employee-create' })
@@ -62,11 +76,31 @@ function confirmDelete() {
 <template>
   <v-card>
     <v-card-item>
-      <v-card-title class="text-h6">Employees</v-card-title>
-      <v-card-subtitle>
-        <template v-if="hasActiveFilter">{{ matchCount }} of {{ count }} shown</template>
-        <template v-else>{{ count }} {{ count === 1 ? 'record' : 'records' }} on file</template>
-      </v-card-subtitle>
+      <div class="d-flex align-center justify-space-between ga-3">
+        <div>
+          <v-card-title class="px-0 text-h6">Employees</v-card-title>
+          <v-card-subtitle class="px-0">
+            <template v-if="hasActiveFilter">{{ matchCount }} of {{ count }} shown</template>
+            <template v-else>{{ count }} {{ count === 1 ? 'record' : 'records' }} on file</template>
+          </v-card-subtitle>
+        </div>
+        <v-menu location="bottom end">
+          <template #activator="{ props: menuProps }">
+            <v-btn
+              v-bind="menuProps"
+              variant="text"
+              icon="mdi-dots-vertical"
+              title="Import / export"
+              aria-label="Import / export"
+            />
+          </template>
+          <v-list density="compact">
+            <v-list-item prepend-icon="mdi-code-json" title="Export JSON" @click="exportJson" />
+            <v-list-item prepend-icon="mdi-file-delimited-outline" title="Export CSV" @click="exportCsv" />
+            <v-list-item prepend-icon="mdi-upload-outline" title="Import JSON" @click="importOpen = true" />
+          </v-list>
+        </v-menu>
+      </div>
     </v-card-item>
 
     <v-divider />
@@ -215,6 +249,8 @@ function confirmDelete() {
       ({{ deleteTarget.code }}) from the directory. This action cannot be undone.
     </template>
   </ConfirmDialog>
+
+  <ImportDialog v-model="importOpen" />
 
   <v-btn
     class="create-fab"
