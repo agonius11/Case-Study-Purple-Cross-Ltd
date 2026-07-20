@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useEmployeesStore } from '@/stores/employees'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { formatDate } from '@/utils/date'
 import EmploymentStatusChip from '@/components/EmploymentStatusChip.vue'
 import EmployeeForm from '@/components/EmployeeForm.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const props = defineProps<{ code: string }>()
 
@@ -29,8 +30,9 @@ function exitEdit() {
   router.replace({ query: {} })
 }
 
-// Deletion is immediate for now; a confirmation dialog is added in a later phase.
-function deleteEmployee() {
+const confirmOpen = ref(false)
+
+function confirmDelete() {
   if (!employee.value) return
   const code = employee.value.code
   store.remove(code)
@@ -59,7 +61,7 @@ function deleteEmployee() {
               variant="tonal"
               color="error"
               prepend-icon="mdi-delete-outline"
-              @click="deleteEmployee"
+              @click="confirmOpen = true"
             >
               Delete
             </v-btn>
@@ -111,6 +113,17 @@ function deleteEmployee() {
         </v-col>
       </v-row>
     </v-card-text>
+
+    <ConfirmDialog
+      v-model="confirmOpen"
+      title="Delete employee?"
+      confirm-text="Delete"
+      confirm-color="error"
+      @confirm="confirmDelete"
+    >
+      This will permanently remove <strong>{{ employee.fullName }}</strong>
+      ({{ employee.code }}) from the directory. This action cannot be undone.
+    </ConfirmDialog>
   </v-card>
 
   <v-card v-else class="text-center pa-10">

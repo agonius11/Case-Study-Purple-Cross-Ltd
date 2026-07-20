@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useEmployeesStore } from '@/stores/employees'
@@ -7,6 +7,7 @@ import { useSnackbar } from '@/composables/useSnackbar'
 import { useEmployeeFilters, STATUS_OPTIONS } from '@/composables/useEmployeeFilters'
 import { formatDate } from '@/utils/date'
 import EmploymentStatusChip from '@/components/EmploymentStatusChip.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import type { Employee } from '@/types/employee'
 
 const router = useRouter()
@@ -41,10 +42,20 @@ function editEmployee(code: string) {
   router.push({ name: 'employee-profile', params: { code }, query: { edit: '1' } })
 }
 
-// Deletion is immediate for now; a confirmation dialog is added in a later phase.
-function deleteEmployee(employee: Employee) {
-  store.remove(employee.code)
-  snackbar.success(`Employee ${employee.code} deleted`)
+const deleteTarget = ref<Employee | null>(null)
+const confirmOpen = ref(false)
+
+function askDelete(employee: Employee) {
+  deleteTarget.value = employee
+  confirmOpen.value = true
+}
+
+function confirmDelete() {
+  const target = deleteTarget.value
+  if (!target) return
+  store.remove(target.code)
+  snackbar.success(`Employee ${target.code} deleted`)
+  deleteTarget.value = null
 }
 </script>
 
@@ -165,7 +176,7 @@ function deleteEmployee(employee: Employee) {
             color="error"
             title="Delete"
             aria-label="Delete"
-            @click="deleteEmployee(item)"
+            @click="askDelete(item)"
           />
         </div>
       </template>
@@ -191,6 +202,19 @@ function deleteEmployee(employee: Employee) {
       </template>
     </v-data-table>
   </v-card>
+
+  <ConfirmDialog
+    v-model="confirmOpen"
+    title="Delete employee?"
+    confirm-text="Delete"
+    confirm-color="error"
+    @confirm="confirmDelete"
+  >
+    <template v-if="deleteTarget">
+      This will permanently remove <strong>{{ deleteTarget.fullName }}</strong>
+      ({{ deleteTarget.code }}) from the directory. This action cannot be undone.
+    </template>
+  </ConfirmDialog>
 
   <v-btn
     class="create-fab"
