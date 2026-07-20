@@ -164,12 +164,12 @@ function confirmDelete() {
       item-value="code"
       :items-per-page="10"
       :items-per-page-options="[10, 25, 50, 100]"
-      mobile-breakpoint="sm"
+      mobile-breakpoint="md"
       hover
       density="comfortable"
     >
       <template #[`item.dateOfEmployment`]="{ item }">
-        <div class="d-flex align-center ga-2">
+        <div class="d-flex align-center flex-wrap ga-2">
           <EmploymentStatusChip :date="item.dateOfEmployment" kind="employment" />
           <span v-if="item.dateOfEmployment" class="text-caption text-medium-emphasis">
             {{ formatDate(item.dateOfEmployment) }}
@@ -178,7 +178,7 @@ function confirmDelete() {
       </template>
 
       <template #[`item.terminationDate`]="{ item }">
-        <div class="d-flex align-center ga-2">
+        <div class="d-flex align-center flex-wrap ga-2">
           <EmploymentStatusChip :date="item.terminationDate" kind="termination" />
           <span v-if="item.terminationDate" class="text-caption text-medium-emphasis">
             {{ formatDate(item.terminationDate) }}
