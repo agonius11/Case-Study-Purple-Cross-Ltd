@@ -164,6 +164,7 @@ function confirmDelete() {
       item-value="code"
       :items-per-page="10"
       :items-per-page-options="[10, 25, 50, 100]"
+      mobile-breakpoint="sm"
       hover
       density="comfortable"
     >
@@ -260,16 +261,24 @@ function confirmDelete() {
     prepend-icon="mdi-plus"
     @click="createEmployee"
   >
-    Create employee
+    <span class="d-none d-sm-inline">Create employee</span>
+    <span class="d-sm-none">New</span>
   </v-btn>
 </template>
 
 <style scoped>
 .create-fab {
   position: fixed;
-  right: max(24px, env(safe-area-inset-right));
-  bottom: calc(24px + env(safe-area-inset-bottom));
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom));
   z-index: 100;
   border-radius: 999px;
+}
+
+@media (min-width: 600px) {
+  .create-fab {
+    right: 24px;
+    bottom: 24px;
+  }
 }
 </style>
