@@ -29,6 +29,10 @@ const headers = [
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' as const, width: 140 },
 ]
 
+function createEmployee() {
+  router.push({ name: 'employee-create' })
+}
+
 function viewEmployee(code: string) {
   router.push({ name: 'employee-profile', params: { code } })
 }
@@ -187,4 +191,25 @@ function deleteEmployee(employee: Employee) {
       </template>
     </v-data-table>
   </v-card>
+
+  <v-btn
+    class="create-fab"
+    color="primary"
+    size="large"
+    elevation="6"
+    prepend-icon="mdi-plus"
+    @click="createEmployee"
+  >
+    Create employee
+  </v-btn>
 </template>
+
+<style scoped>
+.create-fab {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  z-index: 100;
+  border-radius: 999px;
+}
+</style>

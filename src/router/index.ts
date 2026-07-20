@@ -14,6 +14,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'Employees' },
   },
   {
+    path: '/employees/new',
+    name: 'employee-create',
+    component: () => import('@/views/EmployeeCreateView.vue'),
+    meta: { title: 'Create employee' },
+  },
+  {
     path: '/employees/:code',
     name: 'employee-profile',
     component: () => import('@/views/EmployeeProfileView.vue'),

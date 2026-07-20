@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useEmployeesStore } from '@/stores/employees'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { formatDate } from '@/utils/date'
 import EmploymentStatusChip from '@/components/EmploymentStatusChip.vue'
+import EmployeeForm from '@/components/EmployeeForm.vue'
 
 const props = defineProps<{ code: string }>()
 
+const route = useRoute()
 const router = useRouter()
 const store = useEmployeesStore()
 const snackbar = useSnackbar()
 
 const employee = computed(() => store.byCode(props.code))
+const isEditing = computed(() => route.query.edit === '1')
 
 function backToList() {
   router.push({ name: 'employee-list' })
@@ -20,6 +23,10 @@ function backToList() {
 
 function editEmployee() {
   router.replace({ query: { edit: '1' } })
+}
+
+function exitEdit() {
+  router.replace({ query: {} })
 }
 
 // Deletion is immediate for now; a confirmation dialog is added in a later phase.
@@ -37,27 +44,37 @@ function deleteEmployee() {
     <v-card-item>
       <div class="d-flex align-center justify-space-between flex-wrap ga-3">
         <div>
-          <v-card-title class="text-h6 px-0">{{ employee.fullName }}</v-card-title>
+          <v-card-title class="text-h6 px-0">
+            {{ isEditing ? 'Edit employee' : employee.fullName }}
+          </v-card-title>
           <v-card-subtitle class="px-0">{{ employee.code }}</v-card-subtitle>
         </div>
         <div class="d-flex flex-wrap ga-2">
           <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="backToList">Back</v-btn>
-          <v-btn variant="tonal" prepend-icon="mdi-pencil-outline" @click="editEmployee">Edit</v-btn>
-          <v-btn
-            variant="tonal"
-            color="error"
-            prepend-icon="mdi-delete-outline"
-            @click="deleteEmployee"
-          >
-            Delete
-          </v-btn>
+          <template v-if="!isEditing">
+            <v-btn variant="tonal" prepend-icon="mdi-pencil-outline" @click="editEmployee">
+              Edit
+            </v-btn>
+            <v-btn
+              variant="tonal"
+              color="error"
+              prepend-icon="mdi-delete-outline"
+              @click="deleteEmployee"
+            >
+              Delete
+            </v-btn>
+          </template>
         </div>
       </div>
     </v-card-item>
 
     <v-divider />
 
-    <v-card-text>
+    <v-card-text v-if="isEditing">
+      <EmployeeForm mode="edit" :initial="employee" @saved="exitEdit" @cancel="exitEdit" />
+    </v-card-text>
+
+    <v-card-text v-else>
       <v-row>
         <v-col cols="12" md="6">
           <div class="text-overline text-medium-emphasis mb-2">Identity</div>
